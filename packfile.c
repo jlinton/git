@@ -1433,7 +1433,7 @@ static void *unpack_compressed_entry(struct packed_git *p,
 		return NULL;
 	memset(&stream, 0, sizeof(stream));
 	stream.next_out = buffer;
-	stream.avail_out = size + 1;
+	stream.avail_out = size;
 
 	git_inflate_init(&stream);
 	do {
@@ -1441,7 +1441,7 @@ static void *unpack_compressed_entry(struct packed_git *p,
 		stream.next_in = in;
 		st = git_inflate(&stream, Z_FINISH);
 		if (!stream.avail_out)
-			break; /* the payload is larger than it should be */
+			break; /* done, st indicates if source fully consumed */
 		curpos += stream.next_in - in;
 	} while (st == Z_OK || st == Z_BUF_ERROR);
 	git_inflate_end(&stream);
